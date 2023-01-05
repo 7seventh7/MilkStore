@@ -16,8 +16,16 @@ class TransactionAdmin(admin.ModelAdmin):
 
 class PurchaseAdmin(admin.ModelAdmin):
     list_display = ('id', 'user')
-
+#
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Purchase, PurchaseAdmin)
+#
+# router = routers.DefaultRouter()
+# router.register(r'product', ProductListAPIView)
+#
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('', include(router.urls)),
+# ]
 
