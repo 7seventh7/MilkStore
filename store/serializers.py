@@ -2,6 +2,35 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import *
 
+# class ProductSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Product
+#         fields = ('__all__')
+
+class PurchaseSerializer(serializers.ModelSerializer):
+
+    product_list = serializers.SerializerMethodField(read_only=True)
+
+    def get_product_list(self, data):
+        product_list = getattr(data, 'product_list')
+        print('product_list=', product_list)
+        #last_purches = Transaction.objects.filter(purchase__user=product_list).last()
+        return product_list
+
+    class Meta:
+        model = Purchase
+        fields = ('product_list',)
+
+class TransactionSerializer(serializers.ModelSerializer):
+
+    user_name = serializers.CharField(source='purchase.user')
+    email = serializers.CharField(source='purchase.user.email')
+    purchase = PurchaseSerializer()
+    class Meta:
+        model = Transaction
+        fields = ('user_name', 'email', 'time_creation', 'purchase')
+
 class UserSerializer(serializers.ModelSerializer):
 
     #Дополнительне поле для вывода даты последней покупки пользователя
@@ -9,7 +38,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_last_purches(self, data): #data приходит из views.py
         username = getattr(data, 'id')
-        # пример обращения к связанной purchase талбице через foreinkey (purchase__use)
         last_purches = Transaction.objects.filter(purchase__user=username).last()
         return last_purches.time_creation
 

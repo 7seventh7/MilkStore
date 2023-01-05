@@ -2,6 +2,11 @@ from rest_framework import generics
 from .models import *
 from .serializers import *
 
+
+class UsersTransactionAPIViev(generics.ListAPIView):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+
 class UsersListAPIView(generics.ListAPIView):
     """Получаем список всех Пользователей"""
     queryset = User.objects.all()
