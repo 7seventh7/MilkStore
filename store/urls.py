@@ -6,5 +6,6 @@ urlpatterns = [
     path('', product_list_create_view),
     path('<int:pk>/', product_list_view),
     path('all_users', UsersListAPIView.as_view()),
-    path('tr', UsersTransactionAPIViev.as_view())
+    path('tr', UsersTransactionAPIViev.as_view()),
+    path('purchase', PurchasisAPIViev.as_view()),
 ]

@@ -1,16 +1,25 @@
+from django.db.models import F
 from rest_framework import generics
 from .models import *
 from .serializers import *
+
+class PurchasisAPIViev(generics.ListAPIView):
+    queryset = Purchase.objects.all()
+    serializer_class = PurchaseSerializer
 
 
 class UsersTransactionAPIViev(generics.ListAPIView):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
+
+
 class UsersListAPIView(generics.ListAPIView):
     """Получаем список всех Пользователей"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
 
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     """Получаем списко всех продуктов в магазине и добавляем новый продукт"""
