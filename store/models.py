@@ -19,9 +19,14 @@ class Product(models.Model):
 class Purchase(models.Model):
     product_list = models.ManyToManyField(Product, related_name='product_list')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+
+
     class Meta:
         verbose_name = ('Покупка')
         verbose_name_plural = ('Покупки')
+
+    def get_product_list(self):
+        return self.product_list
 
 
 class Transaction(models.Model):
