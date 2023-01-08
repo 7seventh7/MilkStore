@@ -25,8 +25,10 @@ class Purchase(models.Model):
         verbose_name = ('Покупка')
         verbose_name_plural = ('Покупки')
 
-    def get_product_list(self):
-        return self.product_list
+    # def get_product_list(self):
+    #     res = []
+    #      res = [a.full_name for a in book.authors.all()]
+    #     return self.product_list
 
 
 class Transaction(models.Model):

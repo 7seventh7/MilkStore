@@ -1,11 +1,21 @@
-from django.db.models import F
+from django.db.models import F, Sum
 from rest_framework import generics
 from .models import *
 from .serializers import *
 
 class PurchasisAPIViev(generics.ListAPIView):
-    queryset = Purchase.objects.all()
+
+    #Добавлеем ещё одно поле (общая стоимость покупки) Вычисляем на стороне БД.
+    queryset = Purchase.objects.all().annotate(
+        total_cost = Sum('product_list__price')
+    )
     serializer_class = PurchaseSerializer
+
+class PurchasisPrefetchAPIViev(generics.ListAPIView):
+    queryset = Purchase.objects.all().annotate(
+        total_cost = Sum('product_list__price')
+    )
+    serializer_class = PurchasePrefetchSerializer
 
 
 class UsersTransactionAPIViev(generics.ListAPIView):
