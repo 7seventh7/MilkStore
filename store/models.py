@@ -14,7 +14,7 @@ class Product(models.Model):
         return "%.2f" %(float(self.price) * 0.8)
 
     def get_discount(self):
-        return "20%"
+        return "21%"
 
 class Purchase(models.Model):
     product_list = models.ManyToManyField(Product, related_name='product_list')
