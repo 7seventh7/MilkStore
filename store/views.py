@@ -1,9 +1,35 @@
 from django.db.models import Sum
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets, mixins
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 
 from .serializers import *
+
+
+class AllUsersGetListAPIView(viewsets.ReadOnlyModelViewSet):
+    """Get liest of products. All users could make GET-requests."""
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+class AuthUsersAddDeleteUpdateProductsAPIView( mixins.CreateModelMixin,
+                                               mixins.UpdateModelMixin,
+                                               mixins.DestroyModelMixin,
+                                               GenericViewSet):
+    """Only Admin can Create, Update, Destroy Products"""
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = (IsAdminUser,)
+
+class AdminGetAllUsersPurchasis(viewsets.ModelViewSet):
+    """Only Admin can get all Purchases of all Users"""
+    queryset = Purchase.objects.all().annotate(
+        total_cost=Sum('product_list__price')
+    )
+    serializer_class = PurchaseSerializer
+    permission_classes = (IsAdminUser,)
 
 
 class TrainingToUseAPIView(APIView):
@@ -48,7 +74,7 @@ class TrainingToUseAPIView2(APIView):
         except:
             return Response({"error": "Object does not exists"})
 
-        serializer = ProductSerializer2(data=request.data, instance=instance)
+        serializer = ProductSerializer2(data=request.data, instance=instance) #request.data = {'title': 1, 'content': 'FFFFFFF', 'price': 550}
         serializer.is_valid(raise_exception=True)
         serializer.save()  #!!!!!!!!! Вот эта штука вызывает метод update т.к. она ждут 2 параметра и мы их в serializer = Product(data=request.data, instance=instance)
         return Response({"post": serializer.data})
@@ -58,6 +84,7 @@ class TrainingToUseAPIView2(APIView):
         return Response({"products": list(data)})
 
     def post(self, request):
+        print('request.data=', request.data)
         serializer = ProductSerializer2(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -95,7 +122,7 @@ class UsersListAPIView(generics.ListAPIView):
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     """Получаем списко всех продуктов в магазине и добавляем новый продукт"""
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer2
+    serializer_class = ProductSerializer
 
     def perform_create(self, serializer):
         # serializer.save(user=self.request.user)
