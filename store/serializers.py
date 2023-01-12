@@ -47,14 +47,6 @@ class PurchaseSerializer(serializers.ModelSerializer):
         else:
             return False
 
-    # def get_total(self, data):
-    #     products = getattr(data, 'id')
-    #     purchase_list = Purchase.objects.get(pk=products) #{'_state': <django.db.models.base.ModelState object at 0x7f25ca7ad280>, 'id': 5, 'user_id': 1}
-    #     print('purchase=', purchase_list.__dict__)
-    #     prod = getattr(purchase_li
-    #     print('prod=', prod.__dict__)
-    #     return True
-
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -81,7 +73,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'is_staff', 'date_joined', 'last_purches')
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer2(serializers.ModelSerializer):
     my_discount = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -93,7 +85,16 @@ class ProductSerializer(serializers.ModelSerializer):
             'sale_price',
             'my_discount'
         ]
+    def create(self, validated_data):
+        return Product.objects.create(**validated_data)
 
+    """Ещё можно метод update определять в сериализаторе"""
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.content = validated_data.get('content', instance.content)
+        instance.price = validated_data.get('price', instance.price)
+        instance.save()
+        return instance
     def get_my_discount(self, obj):
         if not hasattr(obj, 'id'):
             return None
