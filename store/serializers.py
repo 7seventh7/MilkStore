@@ -73,24 +73,32 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'is_staff', 'date_joined', 'last_purches')
 
 
-class ProductSerializer2(serializers.ModelSerializer):
+class ProductSerializer2(serializers.Serializer):
     my_discount = serializers.SerializerMethodField(read_only=True)
+    """Если мы используем класс Serializer то нужно описывать ему как выглядят нужные поля в модели, какие данные ему нужно проверять,
+    Если искользуем класс ModelSerializer, то нужно прописать класс Meta"""
+    title = serializers.CharField()
+    content = serializers.CharField()
+    price = serializers.IntegerField()
 
-    class Meta:
-        model = Product
-        fields = [
-            'title',
-            'content',
-            'price',
-            'sale_price',
-            'my_discount'
-        ]
+    # class Meta:
+    #     model = Product
+    #     fields = [
+    #         'title',
+    #         'content',
+    #         'price',
+    #         'sale_price',
+    #         'my_discount'
+    #     ]
     def create(self, validated_data):
+
+        print('validated_data=', validated_data) #validated_data = {'title': 1, 'content': 'FFFFFFF', 'price': '550'}
         return Product.objects.create(**validated_data)
 
     """Ещё можно метод update определять в сериализаторе"""
     def update(self, instance, validated_data):
-        instance.title = validated_data.get('title', instance.title)
+
+        instance.title = validated_data.get('title', instance.title) #validated_data = {'title': 1, 'content': 'FFFFFFF', 'price': '550'}
         instance.content = validated_data.get('content', instance.content)
         instance.price = validated_data.get('price', instance.price)
         instance.save()
