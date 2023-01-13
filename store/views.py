@@ -1,20 +1,59 @@
 from django.db.models import Sum
 from rest_framework import generics, status, viewsets, mixins
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from .serializers import *
 
+class UserTransactions(viewsets.ReadOnlyModelViewSet):
+    """Get all Transactions of single User. Only User allowed to do get"""
+    serializer_class = TransactionSerializer
+    def get_queryset(self):
+        user_name = self.request.user
+        print('user_name=', user_name)
+        return Transaction.objects.filter(purchase__user=user_name)  #!!!!! обращение к полю в связанной таблице!!!!!!!!!
+        permission_classes = (IsAuthenticated,)
+class AllTransactions(viewsets.ReadOnlyModelViewSet):
+    """Get all Transactions. Only Admin allowed to do it"""
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class UsersCRUDTheirPurchases(viewsets.ModelViewSet):
+    """All Purchases. Get, Post, Put, Delete, List. Only Admin allowed to do it"""
+    serializer_class = PurchasePrefetchSerializer2
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Purchase.objects.filter(user=user)
+
+class UsersCRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
+    """Get, Post, Put, Delete Users. Only Admin allowed to do it"""
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminUser,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Purchase.objects.filter(user=user)
+
+class UsersListAPIView(generics.ListAPIView):
+    """Get Users List. Only Admin allowed to do it"""
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminUser,)
 
 class AllUsersGetListAPIView(viewsets.ReadOnlyModelViewSet):
     """Get liest of products. All users could make GET-requests."""
-
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
-class AuthUsersAddDeleteUpdateProductsAPIView( mixins.CreateModelMixin,
+
+class AuthUsersAddDeleteUpdateProductsAPIView(mixins.CreateModelMixin,
                                                mixins.UpdateModelMixin,
                                                mixins.DestroyModelMixin,
                                                GenericViewSet):
@@ -30,7 +69,6 @@ class AdminGetAllUsersPurchasis(viewsets.ModelViewSet):
     )
     serializer_class = PurchaseSerializer
     permission_classes = (IsAdminUser,)
-
 
 class TrainingToUseAPIView(APIView):
     """методы get, post и др. автоматически отрабатывают они уже определены в классе"""
@@ -78,7 +116,7 @@ class TrainingToUseAPIView2(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()  #!!!!!!!!! Вот эта штука вызывает метод update т.к. она ждут 2 параметра и мы их в serializer = Product(data=request.data, instance=instance)
         return Response({"post": serializer.data})
-    def get(self,request):
+    def get(self,request): # Возвращает только список
 
         data = Product.objects.all().values()
         return Response({"products": list(data)})
@@ -112,11 +150,6 @@ class UsersTransactionAPIViev(generics.ListAPIView):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
-
-class UsersListAPIView(generics.ListAPIView):
-    """Получаем список всех Пользователей"""
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
 
 
 class ProductListCreateAPIView(generics.ListCreateAPIView):
