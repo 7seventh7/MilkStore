@@ -17,6 +17,13 @@ class PurchasePrefetchSerializer(serializers.ModelSerializer):
         model = Purchase
         fields = ('id', 'user', 'product_list', 'total_cost')
 
+class PurchasePrefetchSerializer2(serializers.ModelSerializer):
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault()) # Прячем поле юзера. Юзер выбирается автоматически
+    class Meta:
+        model = Purchase
+        fields = ('id', 'user', 'product_list')
+
 
 class PurchaseSerializer(serializers.ModelSerializer):
     # Получаем список всех товаров входящич в покупку. пример работы с Many to many !!!!! Обязательно source!!!
@@ -50,7 +57,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    user_name = serializers.CharField(source='purchase.user')
+    user_name = serializers.CharField(source='purchase.user')   # Берем данные из связанных таблиц
     email = serializers.CharField(source='purchase.user.email')
     product = PurchaseSerializer(many=True, read_only=True, source='product_list')
 
